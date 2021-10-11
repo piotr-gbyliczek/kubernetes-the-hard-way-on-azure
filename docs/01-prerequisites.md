@@ -20,6 +20,11 @@ Verify the Microsoft Azure CLI 2.0 version is 2.1.0 or higher:
 az --version
 ```
 
+In case you have access to more than one subscription, you can set default subscription with: 
+```shell
+az account set --subscription <subscription-id>
+```
+
 ### Create a default Resource Group in a location
 
 The guide assumes you've installed the [Azure CLI 2.0](https://github.com/azure/azure-cli#installation), and will be creating resources in the `eastus2` location, within a resource group named `kubernetes`. To create this resource group, simply run the following command:
