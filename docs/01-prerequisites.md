@@ -27,13 +27,18 @@ az account set --subscription <subscription-id>
 
 ### Create a default Resource Group in a location
 
-The guide assumes you've installed the [Azure CLI 2.0](https://github.com/azure/azure-cli#installation), and will be creating resources in the `eastus2` location, within a resource group named `kubernetes`. To create this resource group, simply run the following command:
+The guide assumes you've installed the [Azure CLI 2.0](https://github.com/azure/azure-cli#installation), and will be creating resources in the `uksouth` location, within a resource group named `kubernetes`. To create this resource group, simply run the following command:
 
 ```shell
-az group create -n kubernetes -l eastus2
+az group create -n kubernetes -l uksouth
 ```
 
 > Use the `az account list-locations` command to view additional locations.
+
+You can use the following command to set default location:
+```shell
+az config set defaults.default-location=<location>
+```
 
 ## Running Commands in Parallel with tmux
 
