@@ -125,7 +125,7 @@ openssl rand -hex 16  > db/serial
 echo 1001 > db/crlnumber
 ```
 
-We can now start generating files. Start with encrypted key for CA:
+We can now start generating files. Start with encrypted key and certificate signing request for CA:
 
 
 ```shell
@@ -135,6 +135,14 @@ openssl req -new \
 -keyout private/kube-ca.pem
 ```
 
+Then generate the certificte:
+
+```shell
+openssl ca --selfsign \
+-config ../openssl.cnf \
+-out kube-ca.csr \
+--extensions ca_ext
+```
 
 
 
