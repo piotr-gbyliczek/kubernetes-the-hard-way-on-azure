@@ -4,16 +4,11 @@ In this lab you will provision a [PKI Infrastructure](https://en.wikipedia.org/w
 
 # Prerequisites
 
-Before we go onto generating CA and certificates, we get a little helper script that OpenSSL provides as part of the project. On Fedora ot os not installed by default and so requires installation: 
-```shell
-sudo dnf install openssl-perl
-```
-
-Create as well a directory to store all certificates locally, and change to it: 
+Create a directory to store all certificates locally, and change to it: 
 
 ```shell
-mkdir /path/to/kubernetes/lab
-cd /path/to/kubernetes/lab
+mkdir /path/to/kubernetes-the-hard-way
+cd /path/to/kubernetes-the-hard-way
 ```
 
 ## Certificate Authority
@@ -145,7 +140,7 @@ openssl ca --selfsign \
 ```
 
 
-
+######################################## WIP MARKER ###########################################
 ```
 cat > ca-config.json <<EOF
 {
