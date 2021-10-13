@@ -1,14 +1,144 @@
 # Provisioning a CA and Generating TLS Certificates
 
-In this lab you will provision a [PKI Infrastructure](https://en.wikipedia.org/wiki/Public_key_infrastructure) using CloudFlare's PKI toolkit, [cfssl](https://github.com/cloudflare/cfssl), then use it to bootstrap a Certificate Authority, and generate TLS certificates for the following components: etcd, kube-apiserver, kubelet, and kube-proxy.
+In this lab you will provision a [PKI Infrastructure](https://en.wikipedia.org/wiki/Public_key_infrastructure) using [OpenSSL](https://www.openssl.org/), then use it to bootstrap a Certificate Authority, and generate TLS certificates for the following components: etcd, kube-apiserver, kubelet, and kube-proxy.
+
+# Prerequisites
+
+Before we go onto generating CA and certificates, we get a little helper script that OpenSSL provides as part of the project. On Fedora ot os not installed by default and so requires installation: 
+```shell
+sudo dnf install openssl-perl
+```
+
+Create as well a directory to store all certificates locally, and change to it: 
+
+```shell
+mkdir /path/to/kubernetes/lab
+cd /path/to/kubernetes/lab
+```
 
 ## Certificate Authority
 
 In this section you will provision a Certificate Authority that can be used to generate additional TLS certificates.
+The method is taken from [OpenSSL Cookbook](https://www.feistyduck.com/library/openssl-cookbook/online/)
 
 Create the CA configuration file:
 
+```
+[ default ]
+name                    = kube-ca
+domain_suffix           = kubeca.example.com
+aia_url                 = http://$name.$domain_suffix/$name.crt
+crl_url                 = http://$name.$domain_suffix/$name.crl
+ocsp_url                = http://ocsp.$name.$domain_suffix:9080
+name_opt                = utf8,esc_ctrl,multiline,lname,align
+default_ca              = CA_default
+
+[ca_dn]
+countryName             = "GB"
+organizationName        = "OrgName"
+commonName              = "KubeCA"
+
+[ CA_default ]
+
+dir                     = /path/to/kubernetes-the-hard-way/CA
+certs                   = $dir/certs
+crl_dir                 = $dir/crl
+database                = $dir/db/index.txt
+new_certs_dir           = $dir/newcerts
+certificate             = $dir/$name.pem 
+serial                  = $dir/db/serial 
+crlnumber               = $dir/db/crlnumber
+private_key             = $dir/private/$name.pem
+RANDFILE                = $dir/private/random
+default_days            = 3650
+default_crl_days        = 365
+default_md              = sha256
+unique_subject          = no
+copy_extensions         = none
+policy                  = policy_c_o_match
+
+
+[ policy_c_o_match ]
+countryName             = match
+stateOrProvinceName     = optional
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits            = 4096
+encrypt_key             = yes
+default_md              = sha256
+utf8                    = yes
+string_mask             = utf8only
+prompt                  = no
+distinguished_name      = ca_dn
+req_extensions          = ca_ext
+
+[ca_ext]
+basicConstraints        = critical,CA:true
+keyUsage                = critical,keyCertSign,cRLSign
+subjectKeyIdentifier    = hash
+
+[sub_ca_ext]
+authorityInfoAccess     = @issuer_info
+authorityKeyIdentifier  = keyid:always
+basicConstraints        = critical,CA:true,pathlen:0
+crlDistributionPoints   = @crl_info
+extendedKeyUsage        = clientAuth,serverAuth
+keyUsage                = critical,keyCertSign,cRLSign
+nameConstraints         = @name_constraints
+subjectKeyIdentifier    = hash
+
+[crl_info]
+URI.0                   = $crl_url
+
+[issuer_info]
+caIssuers;URI.0         = $aia_url
+OCSP;URI.0              = $ocsp_url
+
+[name_constraints]
+permitted;DNS.0=example.com
+permitted;DNS.1=example.org
+excluded;IP.0=0.0.0.0/0.0.0.0
+excluded;IP.1=0:0:0:0:0:0:0:0/0:0:0:0:0:0:0:0
+
+[ocsp_ext]
+authorityKeyIdentifier  = keyid:always
+basicConstraints        = critical,CA:false
+extendedKeyUsage        = OCSPSigning
+keyUsage                = critical,digitalSignature
+subjectKeyIdentifier    = hash
+
+```
+
+Now, we need to do a bit pf prep work in order to get base of our CA ready. We create directory structure, set permissions, create few files and initiate them with content: 
+
 ```shell
+mkdir root-ca
+cd root-ca
+mkdir certs newcerts db private
+chmod 700 private
+touch db/index
+openssl rand -hex 16  > db/serial
+echo 1001 > db/crlnumber
+```
+
+We can now start generating files. Start with encrypted key for CA:
+
+
+```shell
+openssl req -new \
+-config ../openssl.cnf \
+-out kube-ca.csr \
+-keyout private/kube-ca.pem
+```
+
+
+
+
+```
 cat > ca-config.json <<EOF
 {
   "signing": {
