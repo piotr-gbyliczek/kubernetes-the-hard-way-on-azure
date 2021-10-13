@@ -135,8 +135,9 @@ Then generate the certificte:
 ```shell
 openssl ca --selfsign \
 -config ../openssl.cnf \
--out kube-ca.csr \
---extensions ca_ext
+-in kube-ca.csr \
+-out kube-ca.crt \
+-extensions ca_ext
 ```
 
 
