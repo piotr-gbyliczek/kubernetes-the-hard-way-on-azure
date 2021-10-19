@@ -28,3 +28,13 @@ openssl genrsa -out private/$CA_NAME.key 4096
 openssl req -new -key private/$CA_NAME.key -subj "$CA_SUBJ" -out certs/$CA_NAME.csr
 openssl x509 -req -in certs/$CA_NAME.csr -signkey private/$CA_NAME.key -CAcreateserial -out certs/$CA_NAME.crt -days 1000
 ```
+
+```shell
+ADMIN_NAME='admin'
+ADMIN_SUBJ='/CN=admin/O=system:masters'
+
+
+openssl genrsa -out private/$ADMIN_NAME.key 4096
+openssl req -new -key private/$ADMIN_NAME.key -subj "$ADMIN_SUBJ" -out certs/$ADMIN_NAME.csr
+openssl x509 -req -in certs/$ADMIN_NAME.csr -signkey private/$CA_NAME.key -CAcreateserial -out certs/$ADMIN_NAME.crt -days 1000
+```
