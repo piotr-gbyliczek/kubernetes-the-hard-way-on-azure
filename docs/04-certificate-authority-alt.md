@@ -25,6 +25,6 @@ CA_SUBJ='/CN=KUBERNETES-CA'
 
 
 openssl genrsa -out private/$CA_NAME.key 4096
-openssl req -new -key private/$CA_NAME.key -subj "CA_SUBJ" -out certs/$CA_NAME.csr
+openssl req -new -key private/$CA_NAME.key -subj "$CA_SUBJ" -out certs/$CA_NAME.csr
 openssl x509 -req -in certs/$CA_NAME.csr -signkey private/$CA_NAME.key -CAcreateserial -out certs/$CA_NAME.crt -days 1000
 ```
